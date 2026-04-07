@@ -10,20 +10,20 @@ import prodRibbedCrop from "@/assets/prod-ribbed-crop.jpg";
 import prodCanvasTote from "@/assets/prod-canvas-tote.jpg";
 
 const topPicks = [
-  { image: prodLinenSet, name: "The Viral Linen Set", price: 68, originalPrice: 68, rating: 5, reviewCount: 10, badge: "🔥 Trending", isLifestyle: true },
+  { image: prodLinenSet, name: "The Viral Linen Set", price: 68, originalPrice: 68, rating: 5, reviewCount: 10, isLifestyle: true },
   { image: prodFloralMaxi, name: "Glow Floral Maxi", price: 55, originalPrice: 55, rating: 4, reviewCount: 50 },
-  { image: prodStrawTote, name: "Classic Straw Tote", price: 42, originalPrice: 42, rating: 5, reviewCount: 10, badge: "Limited Stock" },
+  { image: prodStrawTote, name: "Classic Straw Tote", price: 42, originalPrice: 42, rating: 5, reviewCount: 10 },
 ];
 
 const bestSellers = [
-  { image: prodLinenSet, name: "The Viral Linen Set", price: 68, rating: 5, reviewCount: 10, badge: "✨ Bestseller" },
+  { image: prodLinenSet, name: "The Viral Linen Set", price: 68, rating: 5, reviewCount: 10 },
   { image: prodFloralMaxi, name: "Glow Floral Maxi", price: 55, rating: 4, reviewCount: 50 },
   { image: prodStrawTote, name: "Classic Straw Tote", price: 42, rating: 5, reviewCount: 10 },
 ];
 
 const underTwentyFive = [
   { image: prodGoldHoops, name: "Simple Gold Hoops", price: 18, buttonLabel: "Add to Bag" },
-  { image: prodRibbedCrop, name: "Basic Ribbed Crop", price: 22, buttonLabel: "Add to Bag", badge: "New Arrival" },
+  { image: prodRibbedCrop, name: "Basic Ribbed Crop", price: 22, buttonLabel: "Add to Bag" },
   { image: prodCanvasTote, name: "Canvas Tote Bag", price: 24, buttonLabel: "Add to Bag" },
 ];
 
