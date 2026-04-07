@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import ProductCard from "@/components/ProductCard";
 
 import prodLinenSet from "@/assets/prod-linen-set.jpg";
@@ -165,31 +165,34 @@ const ProductListingPage = () => {
     <div className="min-h-screen bg-[#F5EFEA]">
 
       {/* ── Shared page container ── */}
-      <div className="max-w-[1280px] mx-auto px-6 pt-[72px] pb-[80px]">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-6 pt-[48px] md:pt-[72px] pb-[60px] md:pb-[80px]">
 
         {/* ── Title & Subtitle ── */}
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-[40px] md:text-[52px] font-normal text-[#2D2A26] tracking-tight antialiased mb-[12px]">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="font-serif text-[30px] md:text-[52px] font-normal text-[#2D2A26] tracking-tight antialiased mb-[8px] md:mb-[12px]">
             {title}
           </h1>
-          <p className="text-[17px] md:text-[19px] text-[#6F6A64] leading-[1.6] antialiased">
+          <p className="text-[14px] md:text-[19px] text-[#6F6A64] leading-[1.6] antialiased">
             Explore handpicked styles for you
           </p>
         </div>
 
         {/* ── Filter Bar ── */}
-        <div className="relative mb-8">
-          {/* Row: Filters left | Sort right */}
-          <div className="flex flex-wrap items-center justify-between gap-y-3 gap-x-4">
+        <div className="relative mb-6 md:mb-8">
+          {/* Row: Filters left | Sort right — stacks on mobile */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
-            {/* ── LEFT: Filter Pills ── */}
-            <div className="flex flex-wrap items-center gap-3">
+            {/* ── LEFT: Filter Pills — horizontally scrollable on mobile ── */}
+            <div
+              className="no-scrollbar flex items-center gap-3 overflow-x-auto pb-1"
+              style={({ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties)}
+            >
 
-              {/* Style / Material / Size / Color pills (desktop only) */}
+              {/* Style / Material / Size / Color pills */}
               {FILTER_PILLS.map((pill) => (
                 <button
                   key={pill}
-                  className={`${filterBtnClass} hidden md:flex ${
+                  className={`${filterBtnClass} flex-shrink-0 hidden md:flex ${
                     activeFilterPill === pill ? "bg-[#B09886] text-white border-transparent" : ""
                   }`}
                   style={activeFilterPill === pill
@@ -211,7 +214,7 @@ const ProductListingPage = () => {
               <button
                 ref={allFiltersRef}
                 id="all-filters-btn"
-                className={`${filterBtnClass} ${
+                className={`${filterBtnClass} flex-shrink-0 ${
                   isFilterOpen ? "bg-[#B09886] text-white border-transparent" : ""
                 }`}
                 style={isFilterOpen
@@ -235,12 +238,12 @@ const ProductListingPage = () => {
             </div>
 
             {/* ── RIGHT: Sort Dropdown ── */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center flex-shrink-0">
               <select
                 id="sort-by-select"
                 value={sortValue}
                 onChange={(e) => setSortValue(e.target.value)}
-                className="appearance-none pl-4 pr-9 py-[10px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium border border-black/5 outline-none cursor-pointer transition-all duration-200 ease-out"
+                className="appearance-none pl-4 pr-9 py-[10px] min-h-[44px] w-full sm:w-auto rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium border border-black/5 outline-none cursor-pointer transition-all duration-200 ease-out"
                 style={filterBtnStyle}
                 aria-label="Sort products"
               >
@@ -340,7 +343,7 @@ const ProductListingPage = () => {
 
         {/* ── Product Grid ── */}
         {displayedProducts.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" style={{ gridTemplateColumns: "repeat(3, minmax(300px, 1fr))" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-6">
             {displayedProducts.map((product) => (
               <ProductCard
                 key={product.name}

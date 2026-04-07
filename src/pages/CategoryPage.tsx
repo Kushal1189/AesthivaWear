@@ -1,3 +1,4 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import catDresses from "@/assets/cat-summer-dresses.jpg";
 import catSandals from "@/assets/cat-sandals.jpg";
@@ -18,20 +19,23 @@ const CategoryPage = () => {
   return (
     <div className="min-h-screen bg-[#F5EFEA]">
       {/* Header */}
-      <section className="px-4 md:px-8 lg:px-16 pt-[80px] pb-0 text-center">
-        <h1 className="font-serif text-[40px] md:text-[52px] font-normal text-[#2D2A26] tracking-tight antialiased mb-[24px]">
+      <section className="px-4 md:px-8 lg:px-16 pt-[48px] md:pt-[80px] pb-0 text-center">
+        <h1 className="font-serif text-[32px] md:text-[52px] font-normal text-[#2D2A26] tracking-tight antialiased mb-[16px] md:mb-[24px]">
           All Categories
         </h1>
-        <p className="text-[17px] md:text-[19px] text-[#6F6A64] leading-[1.6] antialiased mb-[32px]">
+        <p className="text-[15px] md:text-[19px] text-[#6F6A64] leading-[1.6] antialiased mb-[24px] md:mb-[32px]">
           Explore trending outfits you'll love
         </p>
 
-        {/* Filter Bar */}
-        <div className="flex flex-wrap justify-center gap-4">
+        {/* Filter Bar — horizontally scrollable on mobile */}
+        <div
+          className="no-scrollbar flex items-center gap-3 overflow-x-auto pb-2 justify-start md:justify-center"
+          style={({ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties)}
+        >
           {filters.map((filter) => (
             <button
               key={filter}
-              className="flex items-center gap-2 px-5 py-[10px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out"
+              className="flex flex-shrink-0 items-center gap-2 px-5 py-[10px] min-h-[44px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out"
               style={{
                 boxShadow: "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
               }}
@@ -62,15 +66,15 @@ const CategoryPage = () => {
       </section>
 
       {/* Category Grid */}
-      <section className="px-4 md:px-8 lg:px-16 py-[60px]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[32px] mt-[40px]">
+      <section className="px-4 md:px-8 lg:px-16 py-[48px] md:py-[60px]">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[32px] mt-[24px] md:mt-[40px]">
           {categories.map((cat) => (
             <div
               key={cat.title}
               className="group bg-white rounded-[20px] p-[16px] shadow-[0_8px_24px_rgba(0,0,0,0.05)] flex flex-col items-center hover:-translate-y-[6px] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-300 ease-out cursor-pointer"
             >
               {/* Image */}
-              <div className="w-full h-[220px] overflow-hidden rounded-[12px]">
+              <div className="w-full h-[200px] md:h-[220px] overflow-hidden rounded-[12px]">
                 <img
                   src={cat.image}
                   alt={cat.title}
@@ -82,13 +86,13 @@ const CategoryPage = () => {
               </div>
 
               {/* Title */}
-              <h3 className="font-serif text-[22px] font-medium text-[#2D2A26] mt-5 mb-3 text-center antialiased">
+              <h3 className="font-serif text-[20px] md:text-[22px] font-medium text-[#2D2A26] mt-4 md:mt-5 mb-3 text-center antialiased">
                 {cat.title}
               </h3>
 
               {/* Button */}
-              <Link to={`/category/${cat.slug}`}>
-                <Button className="bg-[#B09886] hover:bg-[#9A8475] text-white rounded-full px-[20px] py-[10px] h-auto text-[14px] font-medium transition-all duration-250 ease-in-out hover:scale-[1.05] shadow-[0_4px_14px_rgba(0,0,0,0.06)] border-none mt-[12px]">
+              <Link to={`/category/${cat.slug}`} className="w-full sm:w-auto">
+                <Button className="bg-[#B09886] hover:bg-[#9A8475] text-white rounded-full w-full sm:w-auto px-[20px] min-h-[44px] py-[10px] h-auto text-[14px] font-medium transition-all duration-250 ease-in-out hover:scale-[1.05] shadow-[0_4px_14px_rgba(0,0,0,0.06)] border-none mt-[8px] md:mt-[12px]">
                   {cat.cta}
                 </Button>
               </Link>
