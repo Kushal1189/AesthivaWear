@@ -90,58 +90,8 @@ const CategoryPage = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-center gap-[12px] justify-start w-full max-w-6xl mx-auto mt-[24px] mb-[32px] md:mb-[40px]">
+        <div className="flex flex-nowrap items-center justify-between gap-[12px] w-full max-w-6xl mx-auto mt-[24px] mb-[32px] md:mb-[40px]">
           
-          {/* Sort Button */}
-          <div className="relative flex-shrink-0">
-            <button
-              ref={sortBtnRef}
-              className={`${filterBtnClass} w-auto ${isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
-              style={isSortOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
-              onClick={() => setIsSortOpen((v) => !v)}
-              onMouseEnter={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
-              onMouseLeave={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, isSortOpen ? {} : filterBtnStyle); }}
-              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
-              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
-            >
-              {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort"}
-              {chevronDown(isSortOpen)}
-            </button>
-
-            {/* Sort Dropdown Menu */}
-            <div
-              ref={sortRef}
-              className="absolute left-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
-              style={{
-                transform: isSortOpen ? "translateY(0)" : "translateY(-10px)",
-                opacity: isSortOpen ? 1 : 0,
-                pointerEvents: isSortOpen ? "auto" : "none",
-                transition: "opacity 0.22s ease, transform 0.22s ease",
-                marginTop: "8px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                minWidth: "160px"
-              }}
-            >
-              <div className="flex flex-col py-2">
-                <button
-                  className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === "" ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
-                  onClick={() => { setSortValue(""); setIsSortOpen(false); }}
-                >
-                  Sort
-                </button>
-                {SORT_OPTIONS.map(({ label, value }) => (
-                  <button
-                    key={value}
-                    className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === value ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
-                    onClick={() => { setSortValue(value); setIsSortOpen(false); }}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {/* All Filters Button */}
           <div className="relative flex-shrink-0">
             <button
@@ -177,6 +127,56 @@ const CategoryPage = () => {
             >
               <p className="text-[14px] text-[#2D2A26] font-medium mb-2">Filters</p>
               <p className="text-[13px] text-[#6F6A64]">Advanced filtering options will appear here.</p>
+            </div>
+          </div>
+
+          {/* Sort Button */}
+          <div className="relative flex-shrink-0">
+            <button
+              ref={sortBtnRef}
+              className={`${filterBtnClass} w-auto ${isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
+              style={isSortOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
+              onClick={() => setIsSortOpen((v) => !v)}
+              onMouseEnter={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
+              onMouseLeave={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, isSortOpen ? {} : filterBtnStyle); }}
+              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
+              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
+            >
+              {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort"}
+              {chevronDown(isSortOpen)}
+            </button>
+
+            {/* Sort Dropdown Menu */}
+            <div
+              ref={sortRef}
+              className="absolute right-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
+              style={{
+                transform: isSortOpen ? "translateY(0)" : "translateY(-10px)",
+                opacity: isSortOpen ? 1 : 0,
+                pointerEvents: isSortOpen ? "auto" : "none",
+                transition: "opacity 0.22s ease, transform 0.22s ease",
+                marginTop: "8px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                minWidth: "160px"
+              }}
+            >
+              <div className="flex flex-col py-2">
+                <button
+                  className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === "" ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
+                  onClick={() => { setSortValue(""); setIsSortOpen(false); }}
+                >
+                  Sort
+                </button>
+                {SORT_OPTIONS.map(({ label, value }) => (
+                  <button
+                    key={value}
+                    className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === value ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
+                    onClick={() => { setSortValue(value); setIsSortOpen(false); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
