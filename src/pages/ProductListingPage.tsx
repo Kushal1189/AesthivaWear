@@ -106,8 +106,11 @@ const ProductListingPage = () => {
   const [appliedFilters, setAppliedFilters] = useState<FilterState>(initialFilters);
   const [activeFilterPill, setActiveFilterPill] = useState<string | null>(null);
   const [sortValue, setSortValue] = useState("");
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const allFiltersRef = useRef<HTMLButtonElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+  const sortBtnRef = useRef<HTMLButtonElement>(null);
 
   // Close on outside click
   const handleOutsideClick = useCallback((e: MouseEvent) => {
@@ -119,13 +122,24 @@ const ProductListingPage = () => {
     ) {
       setIsFilterOpen(false);
     }
+    if (
+      sortRef.current &&
+      !sortRef.current.contains(e.target as Node) &&
+      sortBtnRef.current &&
+      !sortBtnRef.current.contains(e.target as Node)
+    ) {
+      setIsSortOpen(false);
+    }
   }, []);
 
   useEffect(() => {
-    if (isFilterOpen) document.addEventListener("mousedown", handleOutsideClick);
-    else document.removeEventListener("mousedown", handleOutsideClick);
+    if (isFilterOpen || isSortOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    } else {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    }
     return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [isFilterOpen, handleOutsideClick]);
+  }, [isFilterOpen, isSortOpen, handleOutsideClick]);
 
   // ── Apply filters + sorting to products ────────────────────────────────────
   const displayedProducts = (() => {
@@ -179,8 +193,8 @@ const ProductListingPage = () => {
 
         {/* ── Filter Bar ── */}
         <div className="relative mb-6 md:mb-8">
-          {/* Row: Filters left | Sort right — stacks on mobile */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          {/* Row: Filters left | Sort right */}
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="justify-between">
 
             {/* ── LEFT: Filter Pills — horizontally scrollable on mobile ── */}
             <div
@@ -239,22 +253,67 @@ const ProductListingPage = () => {
 
             {/* ── RIGHT: Sort Dropdown ── */}
             <div className="relative flex items-center flex-shrink-0">
-              <select
-                id="sort-by-select"
-                value={sortValue}
-                onChange={(e) => setSortValue(e.target.value)}
-                className="appearance-none pl-4 pr-9 py-[10px] min-h-[44px] w-full sm:w-auto rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium border border-black/5 outline-none cursor-pointer transition-all duration-200 ease-out"
-                style={filterBtnStyle}
-                aria-label="Sort products"
+              <button
+                ref={sortBtnRef}
+                className={`${filterBtnClass} flex-shrink-0 ${
+                  isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""
+                }`}
+                style={isSortOpen
+                  ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)", width: "auto" }
+                  : { ...filterBtnStyle, width: "auto" }
+                }
+                onClick={() => setIsSortOpen((v) => !v)}
+                onMouseEnter={e => { if (!isSortOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnHoverStyle); }}
+                onMouseLeave={e => { if (!isSortOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, isSortOpen ? {} : filterBtnStyle); }}
               >
-                <option value="" disabled>Sort by</option>
-                {SORT_OPTIONS.map(({ label, value }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-              <span className="pointer-events-none absolute right-[14px] top-1/2 -translate-y-1/2">
-                {chevronDown}
-              </span>
+                {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort by"}
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ transform: isSortOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+                  <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              {/* Sort Dropdown Menu */}
+              <div
+                ref={sortRef}
+                className="absolute right-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
+                style={{
+                  transform: isSortOpen ? "translateY(0)" : "translateY(-10px)",
+                  opacity: isSortOpen ? 1 : 0,
+                  pointerEvents: isSortOpen ? "auto" : "none",
+                  transition: "opacity 0.22s ease, transform 0.22s ease",
+                  marginTop: "8px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                  minWidth: "160px"
+                }}
+              >
+                <div className="flex flex-col py-2">
+                  <button
+                    className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${
+                      sortValue === "" ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"
+                    }`}
+                    onClick={() => {
+                      setSortValue("");
+                      setIsSortOpen(false);
+                    }}
+                  >
+                    Sort by
+                  </button>
+                  {SORT_OPTIONS.map(({ label, value }) => (
+                    <button
+                      key={value}
+                      className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${
+                        sortValue === value ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"
+                      }`}
+                      onClick={() => {
+                        setSortValue(value);
+                        setIsSortOpen(false);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
