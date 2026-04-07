@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import catDresses from "@/assets/cat-summer-dresses.jpg";
 import catSandals from "@/assets/cat-sandals.jpg";
@@ -13,9 +13,69 @@ const categories = [
   { title: "Chic Bags", slug: "chic-bags", image: catBags, cta: "Explore" },
 ];
 
-const filters = ["Filter by Style", "Filter by Material", "All Filters"];
+const SORT_OPTIONS = [
+  { label: "Trending", value: "trending" },
+  { label: "New", value: "new" },
+  { label: "A–Z", value: "az" },
+];
+
+const filterBtnClass =
+  "flex flex-shrink-0 items-center justify-center gap-2 px-[18px] py-[10px] min-h-[44px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out";
+
+const filterBtnStyle = {
+  boxShadow: "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
+} as const;
+
+const filterBtnHoverStyle = {
+  transform: "translateY(-2px)",
+  boxShadow: "0 10px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)",
+} as const;
+
+const filterBtnActiveStyle = {
+  transform: "translateY(0)",
+  boxShadow: "inset 0 2px 6px rgba(0,0,0,0.12)",
+} as const;
+
+const chevronDown = (isOpen: boolean) => (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+    <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 const CategoryPage = () => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const [sortValue, setSortValue] = useState("");
+  
+  const filterBtnRef = useRef<HTMLButtonElement>(null);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+  const sortBtnRef = useRef<HTMLButtonElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  const handleOutsideClick = useCallback((e: MouseEvent) => {
+    if (
+      filterPanelRef.current && !filterPanelRef.current.contains(e.target as Node) &&
+      filterBtnRef.current && !filterBtnRef.current.contains(e.target as Node)
+    ) {
+      setIsFilterOpen(false);
+    }
+    if (
+      sortRef.current && !sortRef.current.contains(e.target as Node) &&
+      sortBtnRef.current && !sortBtnRef.current.contains(e.target as Node)
+    ) {
+      setIsSortOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isFilterOpen || isSortOpen) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    } else {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    }
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isFilterOpen, isSortOpen, handleOutsideClick]);
+
   return (
     <div className="min-h-screen bg-[#F5EFEA]">
       {/* Header */}
@@ -27,41 +87,95 @@ const CategoryPage = () => {
           Explore trending outfits you'll love
         </p>
 
-        {/* Filter Bar — horizontally scrollable on mobile */}
-        <div
-          className="no-scrollbar flex items-center gap-3 overflow-x-auto pb-2 justify-start md:justify-center"
-          style={({ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties)}
-        >
-          {filters.map((filter) => (
+        {/* Filter Bar */}
+        <div className="flex items-center gap-[12px] justify-start md:justify-center relative max-w-6xl mx-auto pb-4">
+          {/* All Filters Button */}
+          <div className="relative">
             <button
-              key={filter}
-              className="flex flex-shrink-0 items-center gap-2 px-5 py-[10px] min-h-[44px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out"
+              ref={filterBtnRef}
+              className={`${filterBtnClass} ${isFilterOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
+              style={isFilterOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
+              onClick={() => setIsFilterOpen((v) => !v)}
+              onMouseEnter={e => { if (!isFilterOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
+              onMouseLeave={e => { if (!isFilterOpen) Object.assign(e.currentTarget.style, isFilterOpen ? {} : filterBtnStyle); }}
+              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
+              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              All Filters
+            </button>
+
+            {/* Dummy Filter Panel */}
+            <div
+              ref={filterPanelRef}
+              className="absolute left-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
               style={{
-                boxShadow: "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
-              }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)";
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)";
-              }}
-              onMouseDown={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "inset 0 2px 6px rgba(0,0,0,0.12)";
-              }}
-              onMouseUp={e => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 10px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)";
+                transform: isFilterOpen ? "translateY(0)" : "translateY(-10px)",
+                opacity: isFilterOpen ? 1 : 0,
+                pointerEvents: isFilterOpen ? "auto" : "none",
+                transition: "opacity 0.22s ease, transform 0.22s ease",
+                marginTop: "8px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                minWidth: "220px",
+                padding: "20px"
               }}
             >
-              {filter}
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M2 4L6 8L10 4" stroke="#3A3733" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <p className="text-[14px] text-[#2D2A26] font-medium mb-2">Filters</p>
+              <p className="text-[13px] text-[#6F6A64]">Advanced filtering options will appear here.</p>
+            </div>
+          </div>
+
+          {/* Sort Button */}
+          <div className="relative flex-shrink-0">
+            <button
+              ref={sortBtnRef}
+              className={`${filterBtnClass} ${isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
+              style={isSortOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
+              onClick={() => setIsSortOpen((v) => !v)}
+              onMouseEnter={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
+              onMouseLeave={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, isSortOpen ? {} : filterBtnStyle); }}
+              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
+              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
+            >
+              {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort"}
+              {chevronDown(isSortOpen)}
             </button>
-          ))}
+
+            {/* Sort Dropdown Menu */}
+            <div
+              ref={sortRef}
+              className="absolute left-0 sm:left-auto sm:right-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
+              style={{
+                transform: isSortOpen ? "translateY(0)" : "translateY(-10px)",
+                opacity: isSortOpen ? 1 : 0,
+                pointerEvents: isSortOpen ? "auto" : "none",
+                transition: "opacity 0.22s ease, transform 0.22s ease",
+                marginTop: "8px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                minWidth: "160px"
+              }}
+            >
+              <div className="flex flex-col py-2">
+                <button
+                  className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === "" ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
+                  onClick={() => { setSortValue(""); setIsSortOpen(false); }}
+                >
+                  Sort
+                </button>
+                {SORT_OPTIONS.map(({ label, value }) => (
+                  <button
+                    key={value}
+                    className={`text-left px-5 py-[10px] text-[14px] hover:bg-[#F5EFEA] transition-colors ${sortValue === value ? "font-bold text-[#2D2A26]" : "text-[#6F6A64]"}`}
+                    onClick={() => { setSortValue(value); setIsSortOpen(false); }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
