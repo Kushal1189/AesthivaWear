@@ -5,7 +5,14 @@ import catSandals from "@/assets/cat-sandals.jpg";
 import catShorts from "@/assets/cat-shorts.jpg";
 import catBags from "@/assets/cat-bags.jpg";
 import { Button } from "@/components/ui/button";
+import FilterButton from "@/components/ui/FilterButton";
 
+const FILTER_SECTIONS = [
+  { id: "category", title: "Category", options: ["Summer Dresses", "Sandals", "Shorts", "Bags"] },
+  { id: "price", title: "Price", options: ["Under $50", "$50 - $100", "Over $100"] },
+  { id: "trending", title: "Trending", options: ["Y2K", "Minimalist", "Boho"] },
+  { id: "occasion", title: "Occasion", options: ["Casual", "Party", "Vacation"] }
+];
 const categories = [
   { title: "Summer Dresses", slug: "summer-dresses", image: catDresses, cta: "Explore" },
   { title: "Trendy Sandals", slug: "trendy-sandals", image: catSandals, cta: "Explore" },
@@ -19,23 +26,6 @@ const SORT_OPTIONS = [
   { label: "A–Z", value: "az" },
 ];
 
-const filterBtnClass =
-  "flex flex-shrink-0 items-center justify-center gap-2 px-[18px] py-[10px] min-h-[44px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out";
-
-const filterBtnStyle = {
-  boxShadow: "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
-} as const;
-
-const filterBtnHoverStyle = {
-  transform: "translateY(-2px)",
-  boxShadow: "0 10px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)",
-} as const;
-
-const filterBtnActiveStyle = {
-  transform: "translateY(0)",
-  boxShadow: "inset 0 2px 6px rgba(0,0,0,0.12)",
-} as const;
-
 const chevronDown = (isOpen: boolean) => (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
     <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -46,16 +36,25 @@ const CategoryPage = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [sortValue, setSortValue] = useState("");
-  
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+
   const filterBtnRef = useRef<HTMLButtonElement>(null);
   const filterPanelRef = useRef<HTMLDivElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
   const sortBtnRef = useRef<HTMLButtonElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
+
+  const toggleFilter = (option: string) => {
+    setActiveFilters(prev => 
+      prev.includes(option) ? prev.filter(f => f !== option) : [...prev, option]
+    );
+  };
 
   const handleOutsideClick = useCallback((e: MouseEvent) => {
     if (
       filterPanelRef.current && !filterPanelRef.current.contains(e.target as Node) &&
-      filterBtnRef.current && !filterBtnRef.current.contains(e.target as Node)
+      filterBtnRef.current && !filterBtnRef.current.contains(e.target as Node) &&
+      mobilePanelRef.current && !mobilePanelRef.current.contains(e.target as Node)
     ) {
       setIsFilterOpen(false);
     }
@@ -76,6 +75,15 @@ const CategoryPage = () => {
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isFilterOpen, isSortOpen, handleOutsideClick]);
 
+  useEffect(() => {
+    if (isFilterOpen && window.innerWidth <= 768) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isFilterOpen]);
+
   return (
     <div className="min-h-screen bg-[#F5EFEA]">
       {/* Header */}
@@ -90,61 +98,92 @@ const CategoryPage = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex flex-nowrap items-center justify-between gap-[12px] w-full max-w-6xl mx-auto mt-[24px] mb-[32px] md:mb-[40px]">
-          
-          {/* All Filters Button */}
-          <div className="relative flex-shrink-0">
-            <button
-              ref={filterBtnRef}
-              className={`${filterBtnClass} w-auto ${isFilterOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
-              style={isFilterOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
-              onClick={() => setIsFilterOpen((v) => !v)}
-              onMouseEnter={e => { if (!isFilterOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
-              onMouseLeave={e => { if (!isFilterOpen) Object.assign(e.currentTarget.style, isFilterOpen ? {} : filterBtnStyle); }}
-              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
-              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-              All Filters
-            </button>
+        <div className="flex items-center justify-between gap-[12px] w-full max-w-6xl mx-auto mt-[24px] mb-[32px] md:mb-[40px]">
 
-            {/* Dummy Filter Panel */}
-            <div
-              ref={filterPanelRef}
-              className="absolute left-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden"
-              style={{
-                transform: isFilterOpen ? "translateY(0)" : "translateY(-10px)",
-                opacity: isFilterOpen ? 1 : 0,
-                pointerEvents: isFilterOpen ? "auto" : "none",
-                transition: "opacity 0.22s ease, transform 0.22s ease",
-                marginTop: "8px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-                minWidth: "220px",
-                padding: "20px"
-              }}
-            >
-              <p className="text-[14px] text-[#2D2A26] font-medium mb-2">Filters</p>
-              <p className="text-[13px] text-[#6F6A64]">Advanced filtering options will appear here.</p>
+          {/* Left Side: Quick Filters + All Filters */}
+          <div className="flex items-center gap-[12px]">
+            
+            {/* Desktop Filters */}
+            <div className="hidden md:flex items-center gap-[12px]">
+              {["Category", "Trending", "New Arrivals", "Price", "Occasion"].map(filter => (
+                <FilterButton key={filter} className="w-auto">
+                  {filter}
+                  {chevronDown(false)}
+                </FilterButton>
+              ))}
+            </div>
+
+            {/* All Filters Button */}
+            <div className="relative flex-shrink-0">
+              <FilterButton
+                ref={filterBtnRef}
+                className="w-auto"
+                isActive={isFilterOpen}
+                onClick={() => setIsFilterOpen((v) => !v)}
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+                All Filters
+              </FilterButton>
+
+              {/* Desktop Filter Dropdown Panel */}
+              <div
+                ref={filterPanelRef}
+                className="absolute left-0 top-full z-50 origin-top bg-white rounded-[16px] overflow-hidden hidden md:block"
+                style={{
+                  transform: isFilterOpen ? "translateY(0)" : "translateY(-10px)",
+                  opacity: isFilterOpen ? 1 : 0,
+                  pointerEvents: isFilterOpen ? "auto" : "none",
+                  transition: "opacity 0.22s ease, transform 0.22s ease",
+                  marginTop: "8px",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+                  minWidth: "260px",
+                  maxHeight: "60vh",
+                  overflowY: "auto"
+                }}
+              >
+                <div className="flex flex-col py-3 px-5">
+                  {FILTER_SECTIONS.map(section => (
+                    <div key={section.id} className="mb-5 last:mb-2">
+                      <p className="text-[14px] text-[#2D2A26] font-bold mb-2">{section.title}</p>
+                      <div className="flex flex-col gap-1">
+                        {section.options.map(option => {
+                          const isActive = activeFilters.includes(option);
+                          return (
+                            <button
+                              key={option}
+                              className={`text-left text-[14px] px-3 py-2 rounded-[8px] transition-colors flex items-center justify-between ${isActive ? "bg-[#EFE7DF] font-medium text-[#2D2A26]" : "hover:bg-[#F5EFEA] text-[#6F6A64]"}`}
+                              onClick={() => toggleFilter(option)}
+                            >
+                              <span>{option}</span>
+                              {isActive && (
+                                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                  <path d="M1 7l3.5 4L13 2" />
+                                </svg>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Sort Button */}
           <div className="relative flex-shrink-0">
-            <button
+            <FilterButton
               ref={sortBtnRef}
-              className={`${filterBtnClass} w-auto ${isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""}`}
-              style={isSortOpen ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" } : filterBtnStyle}
+              className="w-auto"
+              isActive={isSortOpen}
               onClick={() => setIsSortOpen((v) => !v)}
-              onMouseEnter={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, filterBtnHoverStyle); }}
-              onMouseLeave={e => { if (!isSortOpen) Object.assign(e.currentTarget.style, isSortOpen ? {} : filterBtnStyle); }}
-              onMouseDown={e => Object.assign(e.currentTarget.style, filterBtnActiveStyle)}
-              onMouseUp={e => Object.assign(e.currentTarget.style, filterBtnHoverStyle)}
             >
-              {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort"}
+              {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort by"}
               {chevronDown(isSortOpen)}
-            </button>
+            </FilterButton>
 
             {/* Sort Dropdown Menu */}
             <div
@@ -184,7 +223,27 @@ const CategoryPage = () => {
 
       {/* Category Grid */}
       <section className="px-4 md:px-8 lg:px-16 pb-[48px] md:pb-[60px]">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[32px]">
+        <div className="max-w-6xl mx-auto">
+          {/* Active Filter Chips */}
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6 transition-all duration-300">
+              {activeFilters.map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => toggleFilter(filter)}
+                  className="flex items-center gap-1.5 px-[12px] py-[6px] bg-[#EFE7DF] rounded-full text-[13px] text-[#2D2A26] font-medium transition-all hover:opacity-80 active:scale-[0.97]"
+                  style={{ animation: "fadeIn 0.2s ease-out" }}
+                >
+                  {filter}
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                    <path d="M1 9L9 1M1 1l8 8" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[32px]">
           {categories.map((cat) => (
             <div
               key={cat.title}
@@ -216,12 +275,82 @@ const CategoryPage = () => {
             </div>
           ))}
         </div>
+        </div>
       </section>
 
       {/* Footer */}
       <footer className="py-12 bg-[#F5EFEA] text-center text-[#6F6A64] text-[15px] border-t border-[#EAE3DE] mt-4">
         © 2026 AesthivaWear. All rights reserved.
       </footer>
+      {/* Mobile Bottom Sheet Filter Panel */}
+      <div 
+        className="fixed inset-0 z-[100] md:hidden flex justify-center items-end"
+        style={{
+          opacity: isFilterOpen ? 1 : 0,
+          pointerEvents: isFilterOpen ? "auto" : "none",
+          transition: "opacity 0.35s ease-out"
+        }}
+      >
+        <div className="absolute inset-0 bg-black/30 w-full h-full" onClick={() => setIsFilterOpen(false)} />
+        <div 
+          ref={mobilePanelRef}
+          className="relative w-full bg-white rounded-t-[20px] shadow-[0_-4px_24px_rgba(0,0,0,0.12)] flex flex-col"
+          style={{
+            transform: isFilterOpen ? "translateY(0)" : "translateY(100%)",
+            transition: "transform 0.35s ease-out",
+            height: "80vh"
+          }}
+        >
+          {/* Header */}
+          <div className="p-5 border-b border-gray-100 flex justify-between items-center shrink-0">
+            <h2 className="font-serif text-[20px] font-medium text-[#2D2A26]">Filters</h2>
+            <button onClick={() => setIsFilterOpen(false)} className="p-1 active:scale-95 transition-transform text-[#2D2A26]">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M1 13L13 1M1 1l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-5 pb-[120px] no-scrollbar">
+            {FILTER_SECTIONS.map(section => (
+              <div key={section.id} className="mb-6 last:mb-0">
+                <p className="text-[16px] text-[#2D2A26] font-bold mb-3">{section.title}</p>
+                <div className="flex flex-wrap gap-2">
+                  {section.options.map(option => {
+                    const isActive = activeFilters.includes(option);
+                    return (
+                      <button
+                        key={option}
+                        className={`text-[14px] px-4 py-2 rounded-full transition-all active:scale-[0.97] border ${isActive ? "bg-[#2D2A26] text-white border-transparent" : "bg-white text-[#2D2A26] border-[#EAE3DE] hover:border-[#D4CFCB]"}`}
+                        onClick={() => toggleFilter(option)}
+                      >
+                        {option}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="absolute bottom-0 left-0 w-full bg-white border-t border-gray-100 p-5 flex flex-col gap-3 rounded-t-[20px]">
+            <Button 
+              className="w-full rounded-full min-h-[48px] bg-[#2D2A26] hover:bg-black text-white text-[15px] font-medium shadow-[0_4px_14px_rgba(0,0,0,0.08)] active:scale-[0.97] transition-all"
+              onClick={() => setIsFilterOpen(false)}
+            >
+              Apply Filters {activeFilters.length > 0 ? `(${activeFilters.length})` : ""}
+            </Button>
+            <button 
+              className="text-[14px] text-[#6F6A64] font-medium active:scale-[0.97] transition-transform hover:text-[#2D2A26]"
+              onClick={() => setActiveFilters([])}
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

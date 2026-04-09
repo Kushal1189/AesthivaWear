@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import ProductCard from "@/components/ProductCard";
+import FilterButton from "@/components/ui/FilterButton";
 
 import prodLinenSet from "@/assets/prod-linen-set.jpg";
 import prodFloralMaxi from "@/assets/prod-floral-maxi.jpg";
@@ -60,23 +61,6 @@ const slugToTitle = (slug: string) =>
     .join(" ");
 
 // ─── Filter button shared styles ──────────────────────────────────────────────
-const filterBtnStyle = {
-  boxShadow: "0 6px 12px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6)",
-} as const;
-
-const filterBtnHoverStyle = {
-  transform: "translateY(-2px)",
-  boxShadow: "0 10px 20px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7)",
-} as const;
-
-const filterBtnActiveStyle = {
-  transform: "translateY(0)",
-  boxShadow: "inset 0 2px 6px rgba(0,0,0,0.12)",
-} as const;
-
-const filterBtnClass =
-  "flex items-center gap-2 px-5 py-[10px] rounded-full bg-[#EFE7DF] text-[#3A3733] text-[14px] font-medium cursor-pointer outline-none border border-black/5 transition-all duration-200 ease-out";
-
 const chevronDown = (
   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
     <path d="M2 4L6 8L10 4" stroke="#3A3733" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -198,46 +182,29 @@ const ProductListingPage = () => {
 
             {/* ── LEFT: Filter Pills — horizontally scrollable on mobile ── */}
             <div
-              className="no-scrollbar flex items-center gap-3 overflow-x-auto pb-1"
+              className="no-scrollbar flex items-center gap-3 pb-1"
               style={({ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" } as React.CSSProperties)}
             >
 
               {/* Style / Material / Size / Color pills */}
               {FILTER_PILLS.map((pill) => (
-                <button
+                <FilterButton
                   key={pill}
-                  className={`${filterBtnClass} flex-shrink-0 hidden md:flex ${
-                    activeFilterPill === pill ? "bg-[#B09886] text-white border-transparent" : ""
-                  }`}
-                  style={activeFilterPill === pill
-                    ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" }
-                    : filterBtnStyle
-                  }
+                  className="hidden md:flex"
+                  isActive={activeFilterPill === pill}
                   onClick={() => setActiveFilterPill((v) => (v === pill ? null : pill))}
-                  onMouseEnter={e => { if (activeFilterPill !== pill) Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnHoverStyle); }}
-                  onMouseLeave={e => { if (activeFilterPill !== pill) Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnStyle); }}
-                  onMouseDown={e => Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnActiveStyle)}
-                  onMouseUp={e => Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnHoverStyle)}
                 >
                   {pill}
                   {chevronDown}
-                </button>
+                </FilterButton>
               ))}
 
               {/* ── "All Filters" button — opens panel ── */}
-              <button
+              <FilterButton
                 ref={allFiltersRef}
                 id="all-filters-btn"
-                className={`${filterBtnClass} flex-shrink-0 ${
-                  isFilterOpen ? "bg-[#B09886] text-white border-transparent" : ""
-                }`}
-                style={isFilterOpen
-                  ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)" }
-                  : filterBtnStyle
-                }
+                isActive={isFilterOpen}
                 onClick={() => setIsFilterOpen((v) => !v)}
-                onMouseEnter={e => { if (!isFilterOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnHoverStyle); }}
-                onMouseLeave={e => { if (!isFilterOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, isFilterOpen ? {} : filterBtnStyle); }}
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -248,29 +215,22 @@ const ProductListingPage = () => {
                     {activeFilterCount}
                   </span>
                 )}
-              </button>
+              </FilterButton>
             </div>
 
             {/* ── RIGHT: Sort Dropdown ── */}
             <div className="relative flex items-center flex-shrink-0">
-              <button
+              <FilterButton
                 ref={sortBtnRef}
-                className={`${filterBtnClass} flex-shrink-0 ${
-                  isSortOpen ? "bg-[#B09886] text-white border-transparent" : ""
-                }`}
-                style={isSortOpen
-                  ? { boxShadow: "0 6px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.2)", width: "auto" }
-                  : { ...filterBtnStyle, width: "auto" }
-                }
+                className="w-auto"
+                isActive={isSortOpen}
                 onClick={() => setIsSortOpen((v) => !v)}
-                onMouseEnter={e => { if (!isSortOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, filterBtnHoverStyle); }}
-                onMouseLeave={e => { if (!isSortOpen) Object.assign((e.currentTarget as HTMLButtonElement).style, isSortOpen ? {} : filterBtnStyle); }}
               >
                 {sortValue ? SORT_OPTIONS.find(o => o.value === sortValue)?.label : "Sort by"}
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style={{ transform: isSortOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
                   <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </button>
+              </FilterButton>
 
               {/* Sort Dropdown Menu */}
               <div
